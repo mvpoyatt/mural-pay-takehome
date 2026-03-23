@@ -176,6 +176,13 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
 
   const rawStatus = payload.statusChangeDetails?.currentStatus?.type ?? payload.status ?? '';
   const status = mapPayoutStatus(rawStatus);
+
+  // Don't move backwards — COMPLETED and FAILED are terminal
+  if (withdrawal.status === 'COMPLETED' || withdrawal.status === 'FAILED') {
+    console.log(`Withdrawal ${withdrawal.id} already ${withdrawal.status}, ignoring status ${status}`);
+    return;
+  }
+
   await prisma.withdrawal.update({
     where: { id: withdrawal.id },
     data: { status },

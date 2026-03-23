@@ -215,7 +215,7 @@ The backend API is fully functional as a standalone service — all workflows ca
 
 - **Self-hosted x402 facilitator**: Verify ERC-3009 signatures in-process with `viem`, call `transferWithAuthorization` on-chain from a backend wallet. Eliminates the async matching problem entirely and makes Mural a pure payout layer. ~1–2 days; [x402 repo](https://github.com/coinbase/x402) is open source as a reference. Given what Mural is building, this inline crypto-payment-as-middleware pattern could be a natural product offering.
 
-- **Idempotent webhook handling**: Store processed `eventId`s to guard against duplicate `account_credited` deliveries triggering duplicate payouts.
+- **Idempotent webhook handling**: Store processed `eventId`s to guard against duplicate `account_credited` deliveries triggering duplicate payouts. Payout status updates already guard against backwards transitions (COMPLETED/FAILED are treated as terminal), but full idempotency would also deduplicate by `eventId`.
 
 - **Order expiry**: Background job to expire `PENDING_PAYMENT` orders after N hours, preventing stale orders from interfering with fallback amount matching.
 
