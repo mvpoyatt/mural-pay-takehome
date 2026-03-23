@@ -33,16 +33,29 @@ Admin browser
 ### Prerequisites
 
 - Node.js 20+
-- A Mural Pay sandbox account with API key and Transfer API key ([Sandbox docs](https://developers.muralpay.com/docs/sandbox-environment))
-- A Postgres database (local or Railway)
+- A Mural Pay sandbox account — you need an **API key** and a **Transfer API key** ([Sandbox docs](https://developers.muralpay.com/docs/sandbox-environment))
+- A Postgres database (local or cloud)
+- A public HTTPS tunnel for webhooks — [localtunnel](https://theboroer.github.io/localtunnel-www/) or [ngrok](https://ngrok.com/)
 
-### 1. Fill in credentials
+### 1. Start a tunnel
 
-Open `server/src/config.ts` and update `mural.apiKey` and `mural.transferApiKey` with your Mural sandbox API keys.
+Mural delivers webhooks to a public HTTPS URL. Start this first so you have the URL before configuring the server:
 
-The account ID, counterparty, payout method, and webhook are all created or looked up automatically on server start — no manual setup needed beyond the API keys.
+```bash
+npx localtunnel --port 3001
+# Note the URL it prints, e.g. https://abc123.loca.lt
+```
 
-### 2. Set up the database
+### 2. Fill in credentials
+
+Open `server/src/config.ts` and set:
+- `mural.apiKey` — your Mural sandbox API key
+- `mural.transferApiKey` — your Mural Transfer API key (required to execute payouts)
+- `mural.accountId` — your Mural financial account ID
+
+> The Transfer API key requires "Enable API access" to be checked on the financial account in the Mural sandbox dashboard.
+
+### 3. Set up the database
 
 ```bash
 cd server
@@ -51,16 +64,28 @@ DATABASE_URL="postgresql://..." npx prisma migrate dev
 DATABASE_URL="postgresql://..." npm run db:seed
 ```
 
-### 3. Run the backend
+### 4. Configure environment and run the backend
+
+Create `server/.env`:
+
+```
+DATABASE_URL="postgresql://..."
+PUBLIC_URL="https://abc123.loca.lt"
+```
+
+Then start the server:
 
 ```bash
 cd server
-# Create server/.env with: DATABASE_URL="postgresql://..." and PUBLIC_URL="https://your-tunnel-url"
 npm run dev
 # Server starts on http://localhost:3001
 ```
 
-### 4. Run the frontend
+On startup the server will automatically look up the Polygon wallet address, create or reuse the COP counterparty and payout method, and register the Mural webhook at `PUBLIC_URL/api/webhooks/mural`. You should see `Mural Pay initialization complete.` in the logs.
+
+> If `PUBLIC_URL` is not set or points to localhost, the webhook step is skipped and payment detection will not work. The rest of the API remains functional.
+
+### 5. Run the frontend
 
 ```bash
 cd client
@@ -69,16 +94,7 @@ npm run dev
 # Opens http://localhost:5173 (proxies /api → localhost:3001)
 ```
 
-### Webhook development
-
-Mural requires a public HTTPS URL to deliver webhooks. Use [localtunnel](https://theboroer.github.io/localtunnel-www/) or [ngrok](https://ngrok.com/) during local testing:
-
-```bash
-npx localtunnel --port 3001
-# Set PUBLIC_URL=https://xxx.loca.lt in server/.env and restart the server
-```
-
-The server registers the webhook automatically on startup and skips registration if `PUBLIC_URL` points to localhost.
+> The frontend is optional — all workflows can be exercised via curl using the endpoints below.
 
 ---
 
