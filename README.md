@@ -1,4 +1,4 @@
-# Debugging Ducks — Mural Pay Take-Home
+# Mural Pay Take-Home
 
 A marketplace where customers browse rubber ducks, pay in USDC on Polygon, and the merchant automatically receives Colombian Pesos (COP) via Mural Pay's sandbox API.
 
