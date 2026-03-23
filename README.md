@@ -52,13 +52,15 @@ Open `server/src/config.ts` and set:
 cp server/.env.example server/.env
 ```
 
-**DATABASE_URL** — requires Postgres to be installed. Create a local database and paste the connection string:
+**DATABASE_URL** — requires Postgres to be installed. Create a local database and paste the connection string, substituting your macOS username:
 
 ```bash
 createdb mural_takehome
 # Set in server/.env:
-# DATABASE_URL="postgresql://localhost/mural_takehome"
+# DATABASE_URL="postgresql://YOUR_USERNAME@localhost/mural_takehome"
 ```
+
+Not sure of your username? Run `whoami`.
 
 **PUBLIC_URL** — Mural delivers webhooks to a public HTTPS URL. Start a tunnel pointing at port 3001 and paste the URL it prints:
 
