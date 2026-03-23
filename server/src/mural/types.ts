@@ -90,6 +90,10 @@ export interface AccountCreditedPayload {
 export interface PayoutStatusPayload {
   payoutRequestId?: string;
   payoutId?: string;
-  status: string;
+  status?: string;
+  statusChangeDetails?: {
+    currentStatus?: { type: string };
+    previousStatus?: { type: string };
+  };
   [key: string]: unknown;
 }

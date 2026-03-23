@@ -22,7 +22,6 @@ type Withdrawal = {
   id: string;
   orderId: string;
   status: string;
-  amountCop: number | null;
   muralPayoutRequestId: string;
   createdAt: string;
   order: {
@@ -51,6 +50,20 @@ function StatusBadge({ status }: { status: string }) {
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString();
+}
+
+function CopyableId({ value, display }: { value: string; display: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+  return (
+    <button onClick={copy} title={value} className="font-mono text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 cursor-pointer transition-colors">
+      {copied ? '✓ copied' : `${display}…`}
+    </button>
+  );
 }
 
 export function MerchantView() {
@@ -139,7 +152,7 @@ export function MerchantView() {
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
                   {orders.map(order => (
                     <tr key={order.id} className="bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                      <td className="px-4 py-3 font-mono text-xs text-zinc-500">{order.id.slice(0, 8)}…</td>
+                      <td className="px-4 py-3"><CopyableId value={order.id} display={order.id.slice(0, 8)} /></td>
                       <td className="px-4 py-3">
                         <div className="font-medium text-zinc-900 dark:text-white">{order.customerName}</div>
                         <div className="text-zinc-500">{order.customerEmail}</div>
@@ -174,7 +187,6 @@ export function MerchantView() {
                     <th className="px-4 py-3 text-left font-medium">Payout ID</th>
                     <th className="px-4 py-3 text-left font-medium">Customer</th>
                     <th className="px-4 py-3 text-right font-medium">USDC In</th>
-                    <th className="px-4 py-3 text-right font-medium">COP Out</th>
                     <th className="px-4 py-3 text-left font-medium">Status</th>
                     <th className="px-4 py-3 text-left font-medium">Created</th>
                   </tr>
@@ -182,12 +194,9 @@ export function MerchantView() {
                 <tbody className="divide-y divide-zinc-200 dark:divide-zinc-700">
                   {withdrawals.map(w => (
                     <tr key={w.id} className="bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800">
-                      <td className="px-4 py-3 font-mono text-xs text-zinc-500">{w.muralPayoutRequestId.slice(0, 8)}…</td>
+                      <td className="px-4 py-3"><CopyableId value={w.muralPayoutRequestId} display={w.muralPayoutRequestId.slice(0, 8)} /></td>
                       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{w.order.customerName}</td>
                       <td className="px-4 py-3 text-right text-zinc-900 dark:text-white">{w.order.totalUsdc.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right font-medium text-zinc-900 dark:text-white">
-                        {w.amountCop != null ? `${w.amountCop.toLocaleString()} COP` : '—'}
-                      </td>
                       <td className="px-4 py-3"><StatusBadge status={w.status} /></td>
                       <td className="px-4 py-3 text-zinc-500">{formatDate(w.createdAt)}</td>
                     </tr>

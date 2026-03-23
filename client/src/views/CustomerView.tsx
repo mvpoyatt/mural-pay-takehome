@@ -198,7 +198,7 @@ export function CustomerView() {
               disabled={!canCheckout || isCreatingOrder}
               className="w-full py-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-semibold disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
-              {isCreatingOrder ? 'Creating order...' : 'Pay with Crypto'}
+              {isCreatingOrder ? 'Creating order...' : 'Purchase'}
             </button>
           </div>
         </div>

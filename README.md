@@ -204,8 +204,6 @@ The backend API is fully functional as a standalone service — all workflows ca
 
 - **Unmatched payment dashboard**: Admin view for payments that arrived but couldn't be matched to any order, enabling manual resolution / on-chain refund.
 
-- **Multi-merchant support**: Per-merchant Mural accounts, payout configurations, and org model.
-
 - **Real auth**: Replace hardcoded `X-API-Key` with JWT for customer sessions and merchant auth.
 
 - **Secrets management**: Move API keys and credentials out of `config.ts` and into environment variables (or a secrets manager like AWS Secrets Manager / Railway's variable groups). Currently hardcoded per the assignment FAQ; not appropriate for production.

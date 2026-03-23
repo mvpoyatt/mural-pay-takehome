@@ -159,7 +159,6 @@ async function initiateCopPayout(orderId: string, usdcAmount: number): Promise<v
 }
 
 async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<void> {
-  console.log('PAYOUT_REQUEST payload:', JSON.stringify(payload));
   const payoutRequestId = payload.payoutRequestId ?? payload.payoutId;
   if (!payoutRequestId) {
     console.warn('payout status event missing payoutRequestId', payload);
@@ -175,7 +174,8 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
     return;
   }
 
-  const status = mapPayoutStatus(payload.status);
+  const rawStatus = payload.statusChangeDetails?.currentStatus?.type ?? payload.status ?? '';
+  const status = mapPayoutStatus(rawStatus);
   await prisma.withdrawal.update({
     where: { id: withdrawal.id },
     data: { status },
@@ -193,11 +193,11 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
 }
 
 function mapPayoutStatus(muralStatus: string): 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' {
-  const s = muralStatus?.toLowerCase();
+  const s = muralStatus?.toLowerCase().replace(/_/g, '');
   if (s === 'executed' || s === 'completed') return 'COMPLETED';
   if (s === 'failed' || s === 'canceled' || s === 'refunded' || s === 'refinprogress') return 'FAILED';
-  if (s === 'pending' || s === 'on_hold' || s === 'onhold' || s === 'on-hold') return 'PROCESSING';
-  if (s === 'awaiting_execution') return 'PENDING';
+  if (s === 'pending' || s === 'onhold') return 'PROCESSING';
+  if (s === 'awaitingexecution') return 'PENDING';
   console.warn(`Unmapped Mural payout status: "${muralStatus}"`);
   return 'PENDING';
 }

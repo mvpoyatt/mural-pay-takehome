@@ -71,7 +71,7 @@ export function CheckoutModal({
               }}
             >
               <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600, color: isDark ? '#ffffff' : '#111827' }}>
-                Pay with Crypto
+                Purchase
               </h3>
               <button
                 onClick={onClose}
