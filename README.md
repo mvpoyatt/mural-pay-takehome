@@ -48,14 +48,26 @@ Open `server/src/config.ts` and set:
 
 ### 2. Configure environment
 
-Copy `server/.env.example` to `server/.env` and fill in both values:
-
 ```bash
 cp server/.env.example server/.env
 ```
 
-- `DATABASE_URL` — your Postgres connection string
-- `PUBLIC_URL` — a public HTTPS tunnel URL pointing at port 3001 (e.g. from [localtunnel](https://theboroer.github.io/localtunnel-www/) or [ngrok](https://ngrok.com/)). Mural uses this to deliver webhooks. Start the tunnel first, then paste the URL here.
+**DATABASE_URL** — requires Postgres to be installed. Create a local database and paste the connection string:
+
+```bash
+createdb mural_takehome
+# Set in server/.env:
+# DATABASE_URL="postgresql://localhost/mural_takehome"
+```
+
+**PUBLIC_URL** — Mural delivers webhooks to a public HTTPS URL. Start a tunnel pointing at port 3001 and paste the URL it prints:
+
+```bash
+npx localtunnel --port 3001
+# e.g. outputs: your url is: https://abc123.loca.lt
+# Set in server/.env:
+# PUBLIC_URL="https://abc123.loca.lt"
+```
 
 > If `PUBLIC_URL` is omitted or points to localhost, the webhook step is skipped and payment detection will not work. The rest of the API remains functional.
 
