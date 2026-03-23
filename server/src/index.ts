@@ -49,11 +49,12 @@ app.use(errorHandler);
 
 const PORT = config.port;
 
-// Determine public webhook URL (Railway injects RAILWAY_PUBLIC_DOMAIN)
-const publicDomain =
-  process.env.RAILWAY_PUBLIC_DOMAIN ??
-  process.env.PUBLIC_URL ??
-  `http://localhost:${PORT}`;
+// Determine public webhook URL
+// RAILWAY_PUBLIC_DOMAIN is just the hostname (no protocol), PUBLIC_URL is a full URL
+const railwayDomain = process.env.RAILWAY_PUBLIC_DOMAIN;
+const publicDomain = railwayDomain
+  ? `https://${railwayDomain}`
+  : process.env.PUBLIC_URL ?? `http://localhost:${PORT}`;
 
 const webhookUrl = `${publicDomain}/api/webhooks/mural`;
 
