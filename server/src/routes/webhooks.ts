@@ -181,14 +181,6 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
     data: { status },
   });
 
-  // If payout completed, mark the order as completed too
-  if (status === 'COMPLETED') {
-    await prisma.order.update({
-      where: { id: withdrawal.orderId },
-      data: { status: 'COMPLETED' },
-    });
-  }
-
   console.log(`Withdrawal ${withdrawal.id} status -> ${status}`);
 }
 

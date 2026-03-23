@@ -6,6 +6,7 @@ import { config } from './config';
 import { initialize } from './lib/startup';
 import { swaggerSpec } from './lib/openapi';
 import { errorHandler } from './middleware/errors';
+import { requireApiKey } from './middleware/auth';
 
 import healthRouter from './routes/health';
 import productsRouter from './routes/products';
@@ -33,11 +34,11 @@ app.use(express.json());
 app.use('/health', healthRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
-app.use('/api/merchant', merchantRouter);
+app.use('/api/merchant', requireApiKey, merchantRouter);
 app.use('/api/webhooks', webhooksRouter);
 
-// Dev helpers — local only
-if (!process.env.RAILWAY_PUBLIC_DOMAIN) {
+// Dev helpers — disabled in production unless ENABLE_DEV_ROUTES=true
+if (!process.env.RAILWAY_PUBLIC_DOMAIN || process.env.ENABLE_DEV_ROUTES === 'true') {
   app.use('/dev', devRouter);
 }
 

@@ -112,8 +112,8 @@ Interactive docs are served at `/docs` (Swagger UI) and the raw spec at `/openap
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/merchant/orders` | All orders with items and payment status |
-| `GET` | `/api/merchant/withdrawals` | All COP withdrawal records |
+| `GET` | `/api/merchant/orders` | All orders with items and payment status · requires `X-API-Key` |
+| `GET` | `/api/merchant/withdrawals` | All COP withdrawal records · requires `X-API-Key` |
 
 ### System
 
@@ -124,7 +124,7 @@ Interactive docs are served at `/docs` (Swagger UI) and the raw spec at `/openap
 | `GET` | `/docs` | Swagger UI |
 | `GET` | `/openapi.json` | Raw OpenAPI spec |
 
-**Auth:** Include `X-API-Key: mural-takehome-secret` on admin endpoints.
+**Auth:** Admin endpoints require `X-API-Key: mural-takehome-secret` header. Requests without it return `401`.
 
 ---
 

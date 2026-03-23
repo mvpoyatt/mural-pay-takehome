@@ -23,6 +23,11 @@
     "/merchant/orders": {
       "get": {
         "summary": "List all orders with payment status (merchant view)",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Array of orders with items and withdrawal status",
@@ -46,9 +51,7 @@
                         "type": "string",
                         "enum": [
                           "PENDING_PAYMENT",
-                          "PAID",
-                          "COMPLETED",
-                          "FAILED"
+                          "PAID"
                         ]
                       },
                       "totalUsdc": {
@@ -63,6 +66,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key"
           }
         }
       }
@@ -70,6 +76,11 @@
     "/merchant/withdrawals": {
       "get": {
         "summary": "List all COP withdrawals (merchant view)",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
         "responses": {
           "200": {
             "description": "Array of COP withdrawal records with payout status",
@@ -89,11 +100,6 @@
                       "muralPayoutRequestId": {
                         "type": "string"
                       },
-                      "amountCop": {
-                        "type": "number",
-                        "nullable": true,
-                        "description": "COP amount received (null until payout is executed)"
-                      },
                       "status": {
                         "type": "string",
                         "enum": [
@@ -112,6 +118,9 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Missing or invalid X-API-Key"
           }
         }
       }
