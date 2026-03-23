@@ -37,16 +37,7 @@ Admin browser
 - A Postgres database (local or cloud)
 - A public HTTPS tunnel for webhooks — [localtunnel](https://theboroer.github.io/localtunnel-www/) or [ngrok](https://ngrok.com/)
 
-### 1. Start a tunnel
-
-Mural delivers webhooks to a public HTTPS URL. Start this first so you have the URL before configuring the server:
-
-```bash
-npx localtunnel --port 3001
-# Note the URL it prints, e.g. https://abc123.loca.lt
-```
-
-### 2. Fill in credentials
+### 1. Fill in credentials
 
 Open `server/src/config.ts` and set:
 - `mural.apiKey` — your Mural sandbox API key
@@ -55,37 +46,33 @@ Open `server/src/config.ts` and set:
 
 > The Transfer API key requires "Enable API access" to be checked on the financial account in the Mural sandbox dashboard.
 
-### 3. Set up the database
+### 2. Configure environment
+
+Copy `server/.env.example` to `server/.env` and fill in both values:
+
+```bash
+cp server/.env.example server/.env
+```
+
+- `DATABASE_URL` — your Postgres connection string
+- `PUBLIC_URL` — a public HTTPS tunnel URL pointing at port 3001 (e.g. from [localtunnel](https://theboroer.github.io/localtunnel-www/) or [ngrok](https://ngrok.com/)). Mural uses this to deliver webhooks. Start the tunnel first, then paste the URL here.
+
+> If `PUBLIC_URL` is omitted or points to localhost, the webhook step is skipped and payment detection will not work. The rest of the API remains functional.
+
+### 3. Set up the database and run the backend
 
 ```bash
 cd server
 npm install
-DATABASE_URL="postgresql://..." npx prisma migrate dev
-DATABASE_URL="postgresql://..." npm run db:seed
-```
-
-### 4. Configure environment and run the backend
-
-Create `server/.env`:
-
-```
-DATABASE_URL="postgresql://..."
-PUBLIC_URL="https://abc123.loca.lt"
-```
-
-Then start the server:
-
-```bash
-cd server
+npx prisma migrate dev
+npm run db:seed
 npm run dev
 # Server starts on http://localhost:3001
 ```
 
-On startup the server will automatically look up the Polygon wallet address, create or reuse the COP counterparty and payout method, and register the Mural webhook at `PUBLIC_URL/api/webhooks/mural`. You should see `Mural Pay initialization complete.` in the logs.
+On startup the server automatically looks up the Polygon wallet address, creates or reuses the COP counterparty and payout method, and registers the Mural webhook. You should see `Mural Pay initialization complete.` in the logs.
 
-> If `PUBLIC_URL` is not set or points to localhost, the webhook step is skipped and payment detection will not work. The rest of the API remains functional.
-
-### 5. Run the frontend
+### 4. Run the frontend
 
 ```bash
 cd client
