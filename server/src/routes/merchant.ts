@@ -8,8 +8,6 @@ const router = Router();
  * /merchant/orders:
  *   get:
  *     summary: List all orders with payment status (merchant view)
- *     security:
- *       - ApiKeyAuth: []
  *     responses:
  *       200:
  *         description: Array of orders with items and withdrawal status
@@ -34,8 +32,6 @@ const router = Router();
  *                   createdAt:
  *                     type: string
  *                     format: date-time
- *       401:
- *         description: Missing or invalid X-API-Key
  */
 router.get('/orders', async (_req, res, next) => {
   try {
@@ -57,8 +53,6 @@ router.get('/orders', async (_req, res, next) => {
  * /merchant/withdrawals:
  *   get:
  *     summary: List all COP withdrawals (merchant view)
- *     security:
- *       - ApiKeyAuth: []
  *     responses:
  *       200:
  *         description: Array of COP withdrawal records with payout status
@@ -81,8 +75,6 @@ router.get('/orders', async (_req, res, next) => {
  *                   createdAt:
  *                     type: string
  *                     format: date-time
- *       401:
- *         description: Missing or invalid X-API-Key
  */
 router.get('/withdrawals', async (_req, res, next) => {
   try {

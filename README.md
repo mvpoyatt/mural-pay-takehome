@@ -112,8 +112,8 @@ Interactive docs are served at `/docs` (Swagger UI) and the raw spec at `/openap
 
 | Method | Path | Description |
 |---|---|---|
-| `GET` | `/api/merchant/orders` | All orders with items and payment status · requires `X-API-Key` |
-| `GET` | `/api/merchant/withdrawals` | All COP withdrawal records · requires `X-API-Key` |
+| `GET` | `/api/merchant/orders` | All orders with items and payment status |
+| `GET` | `/api/merchant/withdrawals` | All COP withdrawal records |
 
 ### System
 
@@ -124,7 +124,7 @@ Interactive docs are served at `/docs` (Swagger UI) and the raw spec at `/openap
 | `GET` | `/docs` | Swagger UI |
 | `GET` | `/openapi.json` | Raw OpenAPI spec |
 
-**Auth:** Admin endpoints require `X-API-Key: mural-takehome-secret` header. Requests without it return `401`.
+**Auth:** None — admin endpoints are open. See Future Work.
 
 ---
 
@@ -204,7 +204,7 @@ The backend API is fully functional as a standalone service — all workflows ca
 
 - **Unmatched payment dashboard**: Admin view for payments that arrived but couldn't be matched to any order, enabling manual resolution / on-chain refund.
 
-- **Real auth**: Replace hardcoded `X-API-Key` with JWT for customer sessions and merchant auth.
+- **Auth**: Admin endpoints (`/api/merchant/*`) are currently unprotected. Production would add JWT or API key auth for merchant access and session tokens for customers.
 
 - **Secrets management**: Move API keys and credentials out of `config.ts` and into environment variables (or a secrets manager like AWS Secrets Manager / Railway's variable groups). Currently hardcoded per the assignment FAQ; not appropriate for production.
 
