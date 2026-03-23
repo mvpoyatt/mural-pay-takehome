@@ -20,16 +20,6 @@
     }
   },
   "paths": {
-    "/health": {
-      "get": {
-        "summary": "Health check",
-        "responses": {
-          "200": {
-            "description": "Service is running"
-          }
-        }
-      }
-    },
     "/merchant/orders": {
       "get": {
         "summary": "List all orders with payment status (merchant view)",
