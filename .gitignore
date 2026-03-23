@@ -1,0 +1,11 @@
+# Claude Code
+.claude/
+
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+
+# Env files (covered per-service too, but just in case)
+.env

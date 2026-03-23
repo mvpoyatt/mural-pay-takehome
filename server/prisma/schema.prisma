@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  priceUsd    Float
+  imageUrl    String?
+  stock       Int
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  customerName  String
+  customerEmail String
+  status        OrderStatus @default(PENDING_PAYMENT)
+  totalUsdc     Float
+  txHash        String?     // set by frontend after wallet submits transfer
+  walletAddress String      // Mural's Polygon wallet (payment destination)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  items         OrderItem[]
+  withdrawal    Withdrawal?
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String
+  quantity     Int
+  unitPriceUsd Float
+  order        Order   @relation(fields: [orderId], references: [id])
+  product      Product @relation(fields: [productId], references: [id])
+}
+
+model Withdrawal {
+  id                   String           @id @default(cuid())
+  orderId              String           @unique
+  muralPayoutRequestId String
+  amountCop            Float?
+  status               WithdrawalStatus @default(PENDING)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  order                Order            @relation(fields: [orderId], references: [id])
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  COMPLETED
+  FAILED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
