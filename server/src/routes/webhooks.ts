@@ -159,6 +159,7 @@ async function initiateCopPayout(orderId: string, usdcAmount: number): Promise<v
 }
 
 async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<void> {
+  console.log('PAYOUT_REQUEST payload:', JSON.stringify(payload));
   const payoutRequestId = payload.payoutRequestId ?? payload.payoutId;
   if (!payoutRequestId) {
     console.warn('payout status event missing payoutRequestId', payload);

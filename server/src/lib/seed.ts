@@ -25,11 +25,12 @@ const products = [
 ];
 
 async function main() {
+  const existing = await prisma.product.count();
+  if (existing > 0) {
+    console.log(`Products already seeded (${existing} found), skipping.`);
+    return;
+  }
   console.log('Seeding products...');
-  await prisma.orderItem.deleteMany();
-  await prisma.withdrawal.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.product.deleteMany();
   await prisma.product.createMany({ data: products });
   console.log(`Seeded ${products.length} products`);
 }
