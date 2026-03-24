@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import prisma from '../lib/prisma';
 import { state } from '../lib/startup';
 import * as mural from '../mural/client';
-import { WebhookEvent, AccountCreditedPayload, PayoutStatusPayload } from '../mural/types';
+import { WebhookEvent, AccountCreditedPayload } from '../mural/types';
 
 const router = Router();
 
@@ -38,7 +38,7 @@ router.post('/mural', async (req: Request, res: Response, next: NextFunction) =>
         }
         break;
       case 'PAYOUT_REQUEST':
-        await handlePayoutStatusChanged(event.payload as PayoutStatusPayload);
+        await handlePayoutStatusChanged(event.payload as any);
         break;
       default:
         console.log(`Unhandled event category: ${event.eventCategory}`);
@@ -158,8 +158,9 @@ async function initiateCopPayout(orderId: string, usdcAmount: number): Promise<v
   }
 }
 
-async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<void> {
-  const payoutRequestId = payload.payoutRequestId ?? payload.payoutId;
+async function handlePayoutStatusChanged(payload: any): Promise<void> {
+  const p = payload as any;
+  const payoutRequestId = p.payoutRequestId;
   if (!payoutRequestId) {
     console.warn('payout status event missing payoutRequestId', payload);
     return;
@@ -174,12 +175,33 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
     return;
   }
 
-  const rawStatus = payload.statusChangeDetails?.currentStatus?.type ?? payload.status ?? '';
-  const status = mapPayoutStatus(rawStatus);
+  const eventType = p.type;
+  const statusChangeDetails = p.statusChangeDetails;
+  const currentStatusType = statusChangeDetails?.currentStatus?.type ?? '';
+
+  let status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
+
+  if (eventType === 'payout_status_changed' && statusChangeDetails?.type === 'fiat') {
+    // Fiat (COP bank transfer) — the event we care about for completion
+    status = mapFiatPayoutStatus(currentStatusType);
+  } else if (eventType === 'payout_request_status_changed') {
+    // Only surface failures from the request level — request 'executed' does not
+    // mean COP arrived, that comes from the fiat payout_status_changed event
+    if (currentStatusType === 'failed' || currentStatusType === 'canceled') {
+      status = 'FAILED';
+    } else {
+      console.log(`Ignoring payout_request_status_changed: ${currentStatusType}`);
+      return;
+    }
+  } else {
+    // Blockchain payout or unknown type — ignore
+    console.log(`Ignoring ${eventType} (${statusChangeDetails?.type ?? 'unknown'}): ${currentStatusType}`);
+    return;
+  }
 
   // Don't move backwards — COMPLETED and FAILED are terminal
   if (withdrawal.status === 'COMPLETED' || withdrawal.status === 'FAILED') {
-    console.log(`Withdrawal ${withdrawal.id} already ${withdrawal.status}, ignoring status ${status}`);
+    console.log(`Withdrawal ${withdrawal.id} already ${withdrawal.status}, ignoring`);
     return;
   }
 
@@ -191,14 +213,20 @@ async function handlePayoutStatusChanged(payload: PayoutStatusPayload): Promise<
   console.log(`Withdrawal ${withdrawal.id} status -> ${status}`);
 }
 
-function mapPayoutStatus(muralStatus: string): 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' {
-  const s = muralStatus?.toLowerCase().replace(/_/g, '');
-  if (s === 'executed' || s === 'completed') return 'COMPLETED';
-  if (s === 'failed' || s === 'canceled' || s === 'refunded' || s === 'refinprogress') return 'FAILED';
-  if (s === 'pending' || s === 'onhold') return 'PROCESSING';
-  if (s === 'awaitingexecution') return 'PENDING';
-  console.warn(`Unmapped Mural payout status: "${muralStatus}"`);
-  return 'PENDING';
+function mapFiatPayoutStatus(s: string): 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' {
+  switch (s) {
+    case 'created': return 'PENDING';
+    case 'pending': return 'PROCESSING';
+    case 'onHold': return 'PROCESSING';
+    case 'completed': return 'COMPLETED';
+    case 'failed': return 'FAILED';
+    case 'canceled': return 'FAILED';
+    case 'refundInProgress': return 'FAILED';
+    case 'refunded': return 'FAILED';
+    default:
+      console.warn(`Unmapped fiat payout status: "${s}"`);
+      return 'PROCESSING';
+  }
 }
 
 async function logUnmatchedPayment(payload: AccountCreditedPayload): Promise<void> {
